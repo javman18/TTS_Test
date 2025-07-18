@@ -7,6 +7,8 @@ import wave, os
 from datetime import datetime
 import boto3
 import openai
+import platform
+
 
 # === Configuración de APIs ===
 GENAI_API_KEY = "YOUR_GEMINI_KEY"
@@ -77,7 +79,15 @@ while True:
         file_name = f"respuesta_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
         wave_file(file_name, audio_data)
         print(f"🔊 Audio guardado como: {file_name}")
-        os.system(f"afplay {file_name}")  # Solo en macOS
+        # Reproducir el audio según el sistema operativo
+        system_os = platform.system()
+        if system_os == "Darwin":  # macOS
+            os.system(f"afplay {file_name}")
+        elif system_os == "Windows":
+            os.system(f'start /min wmplayer "{file_name}"')  # Usa Windows Media Player
+        else:
+            print("🔇 No se puede reproducir audio automáticamente en este sistema.")
+
 
     except Exception as e:
         print("❌ Error:", e)
