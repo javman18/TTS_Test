@@ -1,5 +1,5 @@
 from elevenlabs.client import ElevenLabs
-from elevenlabs import play, save
+from elevenlabs import play, save, VoiceSettings
 import openai
 import os
 from datetime import datetime
@@ -17,20 +17,26 @@ openai.api_base = "https://openrouter.ai/api/v1"
 elevenlabs = ElevenLabs(api_key=ELEVENLABS_API_KEY)
 
 
-# === Obtener respuesta del LLM ===
+# === Historial de conversación ===
+conversation_history = [
+    {"role": "system", "content": "Responde como un amigo mexicano relajado. Usa lenguaje informal, haz chistes cortos, no expliques cosas innecesarias. Si el usuario dice 'jaja' o no entiende, responde de forma divertida o con otro chiste."}
+]
+
+# === Obtener respuesta del LLM con contexto ===
 def get_llm_response(prompt):
+    conversation_history.append({"role": "user", "content": prompt})
     try:
         response = openai.ChatCompletion.create(
             model="meta-llama/llama-3-8b-instruct",
-            messages=[
-                {"role": "system", "content": "Responde como un amigo mexicano relajado. Usa lenguaje informal, haz chistes cortos, no expliques cosas innecesarias. Si el usuario dice 'jaja' o no entiende, responde de forma divertida o con otro chiste."},
-                {"role": "user", "content": prompt}
-            ]
+            messages=conversation_history
         )
-        return response.choices[0].message.content.strip()
+        reply = response.choices[0].message.content.strip()
+        conversation_history.append({"role": "assistant", "content": reply})
+        return reply
     except Exception as e:
         print(f"⚠️ Error LLM: {e}")
         return "Lo siento, no pude procesar tu solicitud."
+
 
 # === Ciclo interactivo ===
 print("🟢 Escribe lo que quieras. ElevenLabs leerá la respuesta del LLM (escribe 'salir')")
@@ -47,9 +53,16 @@ while True:
 
         # 2. Generar audio con ElevenLabs
         audio = elevenlabs.text_to_speech.convert(
+            ##text=llm_response,
+            voice_id="bkntBQwrjzsp6mDDVjkG",
             text=llm_response,
-            voice_id="JBFqnCBsd6RMkjVDRZzb",
             model_id="eleven_multilingual_v2",
+            voice_settings= VoiceSettings(
+                stability= 0.3,
+                similarity_boost=0.75,
+                use_speaker_boost= True,
+            ),
+            next_text="dijo asustado",
             output_format="mp3_44100_128",
         )
 
