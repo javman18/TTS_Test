@@ -11,8 +11,8 @@ import platform
 
 
 # === Configuración de APIs ===
-GENAI_API_KEY = "AIzaSyDigHn9Ys2GjOu3HFxcCQqXsoq_5wLZ6Lw"
-OPENROUTER_API_KEY = "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"
+GENAI_API_KEY = "YOUR_GEMINI_KEY"
+OPENROUTER_API_KEY = "YOUR_OPEN_ROUTER_KEY"
 
 # OpenRouter
 openai.api_key = OPENROUTER_API_KEY
